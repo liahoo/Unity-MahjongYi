@@ -4,7 +4,7 @@ using UnityEngine;
 namespace MahjongGame.Controllers
 {
 
-    public class MJMineController : MahjongController
+    public class MJMineController : Mahjong
     {
         // Start is called before the first frame update
         void Start()

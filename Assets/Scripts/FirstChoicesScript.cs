@@ -8,11 +8,6 @@ namespace MahjongGame.Controllers
 {
     public class FirstChoicesScript : MonoBehaviour
     {
-        public int cellSpacing = -20;
-        public int cellWidth = 75;
-        public int cellHeight = 111;
-        public int paddingTop = 20;
-        public int paddingBottom = 191;
         public GameObject mahjongPrefab;
         //GridLayoutGroup gridLayout;
         // Start is called before the first frame update
@@ -21,34 +16,31 @@ namespace MahjongGame.Controllers
             //gridLayout = GetComponent<GridLayoutGroup>();
             Debug.Log("Screen.width : " + Screen.width);
             Debug.Log("Screen.height : " + Screen.height);
-            int col = (Screen.width - 80) / 75;
-            int row = (Screen.height - paddingBottom - paddingTop - cellSpacing) / (cellHeight + cellSpacing);
-            if(row * col > 80)
-            {
-                row = 80 / col;
-            }
-            int width = col * 75;
-            int height = row * cellHeight + (row - 1) * cellSpacing;
+            bool isLandscape = Screen.width > Screen.height;
+            int col = isLandscape ? 15 : 8;
+            int row = isLandscape ? 4 : 10;
             RectTransform rectTransofrm = GetComponent<RectTransform>() as RectTransform;
-            rectTransofrm.sizeDelta = new Vector2(width, height);
-            rectTransofrm.localPosition = new Vector3(0, 0, 0);
+            rectTransofrm.Clear();
             InitAllTiles(row, col);
         }
 
         private void InitAllTiles(int row, int col)
         {
             Debug.Log("[InitAllTiles] row:" + row + " col:"+col);
+            
             List<Transform> allTiles = new List<Transform>();
             List<int> indexList = MJGenerator.GenerateForFirstChoose(row * col);
             GridLayoutGroup gridLayoutGroup = GetComponent<GridLayoutGroup>();
-            gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedRowCount;
-            gridLayoutGroup.constraintCount = row;
+            gridLayoutGroup.constraint = GridLayoutGroup.Constraint.Flexible;
+            // gridLayoutGroup.constraintCount = row;
 
             for (int i = 0; i < indexList.Count; i++)
             {
                 GameObject newCell = Instantiate<GameObject>(mahjongPrefab) as GameObject;
-                MjFreeController mahjong = newCell.GetComponent<MjFreeController>() as MjFreeController;
-                mahjong.SetValue(indexList[i]);
+                Mahjong mahjong = newCell.GetComponent<Mahjong>() as Mahjong;
+                mahjong.SetMahjongValue(indexList[i]);
+                // mahjong.SetStatus(Mahjong.Status.Selecting);
+                mahjong.SetStatus(Mahjong.Status.Closed);
                 newCell.transform.SetParent(this.gameObject.transform, false);
             }
         }
