@@ -17,8 +17,8 @@ namespace MahjongGame.Controllers
             Debug.Log("Screen.width : " + Screen.width);
             Debug.Log("Screen.height : " + Screen.height);
             bool isLandscape = Screen.width > Screen.height;
-            int col = isLandscape ? 15 : 8;
-            int row = isLandscape ? 4 : 10;
+            int col = isLandscape ? 14 : 8;
+            int row = isLandscape ? 3 : 7;
             RectTransform rectTransofrm = GetComponent<RectTransform>() as RectTransform;
             rectTransofrm.Clear();
             InitAllTiles(row, col);

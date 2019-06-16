@@ -13,6 +13,7 @@ namespace MahjongGame.Controllers
         public GameObject mahjongPrefab;
         private bool isInited = false;
         private List<int> valueList = new List<int>();
+        private int MaxCount = 13;
         // Start is called before the first frame update
         void Start()
         {
@@ -20,7 +21,6 @@ namespace MahjongGame.Controllers
             bool isLandscape = Screen.width > Screen.height;
             int countOneRow = isLandscape ? 1 : 2;
             int countOneCol = isLandscape ? 13 : 7;
-            int width = 80 * countOneCol;
             RectTransform rectTransofrm = GetComponent<RectTransform>() as RectTransform;
             // rectTransofrm.sizeDelta = new Vector2(width, rectTransofrm.rect.height);
             rectTransofrm.Clear();
@@ -31,7 +31,7 @@ namespace MahjongGame.Controllers
             //     countOneRow = Screen.orientation == ScreenOrientation.Landscape ? 1 : 2;
             //     countOneCol = Screen.orientation == ScreenOrientation.Landscape ? 7 : 13;
             // }
-            // InitAllTiles(countOneRow, countOneCol);
+            InitAllTiles(countOneRow, countOneCol);
         }
 
         internal void Grab(int mahjongValue)
@@ -44,17 +44,19 @@ namespace MahjongGame.Controllers
             Debug.Log("[MyTilesScript] [InitAllTiles] row:" + row + " col:" + col);
             List<Transform> allTiles = new List<Transform>();
             List<int> indexList = MJGenerator.GenerateForFirstChoose(13);
-            GridLayoutGroup gridLayoutGroup = GetComponent<GridLayoutGroup>();
-            gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedRowCount;
-            gridLayoutGroup.constraintCount = row;
+            // GridLayoutGroup gridLayoutGroup = GetComponent<GridLayoutGroup>();
+            // gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedRowCount;
+            // gridLayoutGroup.constraintCount = row;
             indexList.Sort();
             for (int i = 0; i < indexList.Count; i++)
             {
-                Debug.Log(i + "/" + indexList.Count);
-                Debug.Log("next==> " + indexList[i]);
+                valueList.Add(indexList[i]);
                 GameObject newCell = Instantiate<GameObject>(mahjongPrefab) as GameObject;
-                Mahjong mahjong = newCell.GetComponent<Mahjong>() as Mahjong;
-                mahjong.SetMahjongValue(indexList[i]);
+                Mahjong mjToAdd = newCell.GetComponent<Mahjong>() as Mahjong;
+                mjToAdd.name = indexList[i].ToString();
+                mjToAdd.SetMahjongValue(indexList[i]);
+                mjToAdd.SetStatus(Mahjong.Status.Holding);
+                mjToAdd.isMine = true;
                 newCell.transform.SetParent(this.gameObject.transform, false);
             }
         }
@@ -65,32 +67,50 @@ namespace MahjongGame.Controllers
 
         }
 
-        public void AddMahjong(int mahjongValue)
+        public void AddMahjong(Mahjong mjToAdd, bool sort = true)
         {
-            valueList.Add(mahjongValue);
-            valueList.Sort();
-            GameObject newCell = Instantiate<GameObject>(mahjongPrefab) as GameObject;
-            Mahjong mahjong = newCell.GetComponent<Mahjong>() as Mahjong;
-            mahjong.SetMahjongValue(mahjongValue);
-            mahjong.SetStatus(Mahjong.Status.Holding);
-            mahjong.isMine = true;
-            newCell.transform.SetParent(this.gameObject.transform, false);
-            newCell.transform.SetSiblingIndex(valueList.IndexOf(mahjongValue));
+            valueList.Add(mjToAdd.GetMahjongValue());
+            mjToAdd.SetStatus(Mahjong.Status.Holding);
+            mjToAdd.isMine = true;
+            mjToAdd.transform.SetParent(this.gameObject.transform, false);
+            if(sort){
+                valueList.Sort();
+                mjToAdd.transform.SetSiblingIndex(valueList.IndexOf(mjToAdd.GetMahjongValue()));
+            }
         }
 
-        public void ReplaceMahjong(Mahjong toReplace, int mahjongValue){
-            valueList.Remove(toReplace.GetMahjongValue());
-            valueList.Add(mahjongValue);
+        public void ReplaceMahjong(Mahjong mjToAdd) {
+            mjToAdd.SetStatus(Mahjong.Status.Holding);
+            mjToAdd.isMine = true;
+            mjToAdd.transform.SetParent(this.gameObject.transform, false);
+            valueList.Add(mjToAdd.GetMahjongValue());
             valueList.Sort();
-            toReplace.SetStatus(Mahjong.Status.Holding);
-            toReplace.SetMahjongValue(mahjongValue);
-            toReplace.transform.SetSiblingIndex(valueList.IndexOf(mahjongValue));
+            mjToAdd.transform.SetSiblingIndex(valueList.IndexOf(mjToAdd.GetMahjongValue()));
         }
-        public bool ReceiveMahjong(int mahjongValue)
+        public void DeleteMahjong(Mahjong from)
         {
-            if (transform.childCount < 13)
+            valueList.Remove(from.GetMahjongValue());
+            GameObject.Destroy(from);
+        }
+        public void ReplaceMahjong(Mahjong from, Mahjong to){
+            DeleteMahjong(from);
+            ReplaceMahjong(to);
+        }
+
+        public void updateMahjong(Mahjong from, int new_value){
+            valueList.Remove(from.GetMahjongValue());
+            valueList.Add(new_value);
+            valueList.Sort();
+            from.SetStatus(Mahjong.Status.Holding);
+            from.SetMahjongValue(new_value);
+            from.transform.SetSiblingIndex(valueList.IndexOf(new_value));
+
+        }
+        public bool ReceiveMahjong(Mahjong mj)
+        {
+            if (transform.childCount < MaxCount)
             {
-                AddMahjong(mahjongValue);
+                AddMahjong(mj);
                 return true;
             }
             Debug.LogWarning("[ReceiveMahjong] Failed: Already has childCount = " + transform.childCount);
