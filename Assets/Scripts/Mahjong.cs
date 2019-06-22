@@ -18,19 +18,24 @@ namespace MahjongGame.Controllers
             Opened,
             Closed,
             Holding,
-            HoldingToThrow
+            HoldingToThrow,
+            HoldingToGang,
+            IsForGang
         }
         public bool isMine = false;
         private Status currentStatus;
-        private int mahjongValue = 0;
+        public int mahjongValue = 0;
         private void Start()
         {
             //SetStatus(Status.Closed);
         }
 
+        public Status GetStatus(){
+            return currentStatus;
+        }
         public void SetStatus(Status status)
         {
-            Debug.Log(name + " [SetStatus] "+ this.currentStatus + " -> " + status);
+            // Debug.Log(name + " [SetStatus] "+ this.currentStatus + " -> " + status);
             this.currentStatus = status;
             holding.transform.localPosition = new Vector2(0,0);
             switch (status)
@@ -40,12 +45,13 @@ namespace MahjongGame.Controllers
                     holding.gameObject.SetActive(true);
                     opened.gameObject.SetActive(false);
                     break;
+                case Status.HoldingToGang:
                 case Status.HoldingToThrow:
                     closed.gameObject.SetActive(false);
                     holding.gameObject.SetActive(true);
                     opened.gameObject.SetActive(false);
                     if(isMine) {
-                        Debug.Log("Up the holding");
+                        // Debug.Log("Up the holding");
                         holding.transform.localPosition = new Vector2(0,40);
                     }
                     break;
@@ -66,19 +72,21 @@ namespace MahjongGame.Controllers
                     holding.gameObject.SetActive(false);
                     opened.gameObject.SetActive(false);
                     break;
-
             }
         }
+        
+
         public void SetMahjongValue(int v)
         {
             mahjongValue = v;
-            Sprite[] allImages = Resources.LoadAll<Sprite>("mahjong_col9_row6");
+            Sprite[] allImagesHolding = Resources.LoadAll<Sprite>("h");
             Image holdingImage = holding.GetComponent<Image>();
-            holdingImage.sprite = Array.Find(allImages, (sprite) => sprite.name.Equals(v.ToString()));
+            holdingImage.sprite = allImagesHolding[MJHelper.ConvertValueToHoldingImageIndex(v)];
             holdingImage.SetNativeSize();
 
+            Sprite[] allImagesOpened = Resources.LoadAll<Sprite>("o");
             Image openImage = opened.GetComponent<Image>();
-            openImage.sprite = Array.Find(allImages, (sprite) => sprite.name.Equals((v+30).ToString()));
+            openImage.sprite = allImagesOpened[MJHelper.ConvertValueToHoldingImageIndex(v)];
             openImage.SetNativeSize();
         }
 
@@ -89,19 +97,22 @@ namespace MahjongGame.Controllers
 
         public void OnPointUp()
         {
+            MyTilesScript myMahjongs = GameObject.Find("MyTiles").GetComponent<MyTilesScript>() as MyTilesScript;
             switch (currentStatus)
             {
                 case Status.Selecting:
                 case Status.Closed:
-                    MyTilesScript myMahjong = GameObject.Find("MyTiles").GetComponent<MyTilesScript>() as MyTilesScript;
-                    if (myMahjong.ReceiveMahjong(this))
+                    if (myMahjongs.CreateMahjongByValue(mahjongValue))
                     {
+                        SetStatus(Status.Gone);
                         return; //如果被手里的牌接收了，则处理结束
                     }
                     NewFetchScript currentMahjong = GameObject.Find("NewFetched").GetComponent<NewFetchScript>() as NewFetchScript;
                     if (currentMahjong.ReceiveMahjong(this.GetMahjongValue()))
                     {
-                        GameObject.Destroy(this); // 已经被传给当前牌了，因为当前牌是复用，所以可以直接销毁被摸的牌
+                        // GameObject.Destroy(this); // 已经被传给当前牌了，因为当前牌是复用，所以可以直接销毁被摸的牌
+                        // transform.SetParent(null);
+                        SetStatus(Status.Gone);
                         return; // 摸牌的情况
                     }
 
@@ -115,31 +126,28 @@ namespace MahjongGame.Controllers
                     if (currentMahjong2 != null)
                     {
                         Mahjong to = currentMahjong2.GetComponent<Mahjong>() as Mahjong;
-                        MyTilesScript myMahjongs = GameObject.Find("MyTiles").GetComponent<MyTilesScript>() as MyTilesScript;
-                        myMahjongs.updateMahjong(this, to.GetMahjongValue());
-                        to.SetStatus(Status.Gone);
+                        if(to.GetStatus()!=Status.Gone){
+                            myMahjongs.updateMahjong(this, to.GetMahjongValue());
+                            to.SetStatus(Status.Gone);
+                            break;
+                        }
+                    }
+                    // 如果不是手里的牌，直接销毁
+                    if (!this.isMine)
+                    {
+                        GameObject.Destroy(this);
                     }
                     else
                     {
-                        // 如果不是手里的牌，直接销毁
-                        if (!this.isMine)
-                        {
-                            GameObject.Destroy(this);
-                        }
-                        else
-                        {
-                            // (未知错误的时候，通常不会发生)如果是手里的牌，但又没有摸牌，则恢复。
-                            SetStatus(Status.Holding);
-                        }
+                        // (未知错误的时候，通常不会发生)如果是手里的牌，但又没有摸牌，则恢复。
+                        SetStatus(Status.Holding);
                     }
+                    break;
+                case Status.HoldingToGang:
+                    gameObject.SendMessage("OnMahjongSelectedToGang", mahjongValue);
                     break;
 
             }
-        }
-
-        private Status GetStatus()
-        {
-            return currentStatus;
         }
     }
 }

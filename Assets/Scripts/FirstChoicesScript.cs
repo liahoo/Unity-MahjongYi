@@ -17,8 +17,8 @@ namespace MahjongGame.Controllers
             Debug.Log("Screen.width : " + Screen.width);
             Debug.Log("Screen.height : " + Screen.height);
             bool isLandscape = Screen.width > Screen.height;
-            int col = isLandscape ? 14 : 8;
-            int row = isLandscape ? 3 : 7;
+            int col = isLandscape ? 15 : 9;
+            int row = isLandscape ? 4 : 9;
             RectTransform rectTransofrm = GetComponent<RectTransform>() as RectTransform;
             rectTransofrm.Clear();
             InitAllTiles(row, col);
@@ -29,7 +29,7 @@ namespace MahjongGame.Controllers
             Debug.Log("[InitAllTiles] row:" + row + " col:"+col);
             
             List<Transform> allTiles = new List<Transform>();
-            List<int> indexList = MJGenerator.GenerateForFirstChoose(row * col);
+            List<int> indexList = MJHelper.GenerateForFirstChoose(row * col);
             GridLayoutGroup gridLayoutGroup = GetComponent<GridLayoutGroup>();
             gridLayoutGroup.constraint = GridLayoutGroup.Constraint.Flexible;
             // gridLayoutGroup.constraintCount = row;
@@ -39,8 +39,8 @@ namespace MahjongGame.Controllers
                 GameObject newCell = Instantiate<GameObject>(mahjongPrefab) as GameObject;
                 Mahjong mahjong = newCell.GetComponent<Mahjong>() as Mahjong;
                 mahjong.SetMahjongValue(indexList[i]);
-                // mahjong.SetStatus(Mahjong.Status.Selecting);
-                mahjong.SetStatus(Mahjong.Status.Closed);
+                mahjong.SetStatus(Mahjong.Status.Selecting);
+                // mahjong.SetStatus(Mahjong.Status.Closed);
                 newCell.transform.SetParent(this.gameObject.transform, false);
             }
         }
