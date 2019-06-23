@@ -50,13 +50,11 @@ namespace MahjongGame.Controllers
                     closed.gameObject.SetActive(false);
                     holding.gameObject.SetActive(true);
                     opened.gameObject.SetActive(false);
-                    if(isMine) {
-                        // Debug.Log("Up the holding");
-                        holding.transform.localPosition = new Vector2(0,40);
-                    }
+                    holding.transform.localPosition = new Vector2(0,40);
                     break;
                 case Status.Selecting:
                 case Status.Opened:
+                case Status.IsForGang:
                     closed.gameObject.SetActive(false);
                     holding.gameObject.SetActive(false);
                     opened.gameObject.SetActive(true);
@@ -102,6 +100,7 @@ namespace MahjongGame.Controllers
             {
                 case Status.Selecting:
                 case Status.Closed:
+                    myMahjongs.ResetStatus();
                     if (myMahjongs.CreateMahjongByValue(mahjongValue))
                     {
                         SetStatus(Status.Gone);
@@ -121,30 +120,30 @@ namespace MahjongGame.Controllers
                     SetStatus(Status.HoldingToThrow);
                     break;
                 case Status.HoldingToThrow:
-                    // 如果是手里的牌，则需要把新抓的牌替代进去
-                    GameObject currentMahjong2 = GameObject.Find("CurrentMahjong");
-                    if (currentMahjong2 != null)
-                    {
-                        Mahjong to = currentMahjong2.GetComponent<Mahjong>() as Mahjong;
-                        if(to.GetStatus()!=Status.Gone){
-                            myMahjongs.updateMahjong(this, to.GetMahjongValue());
-                            to.SetStatus(Status.Gone);
-                            break;
-                        }
-                    }
                     // 如果不是手里的牌，直接销毁
                     if (!this.isMine)
                     {
-                        GameObject.Destroy(this);
+                        SetStatus(Status.Gone);
                     }
                     else
                     {
-                        // (未知错误的时候，通常不会发生)如果是手里的牌，但又没有摸牌，则恢复。
-                        SetStatus(Status.Holding);
+                        // 如果是手里的牌，则需要把新抓的牌替代进去
+                        GameObject currentMahjong2 = GameObject.Find("CurrentMahjong");
+                        if (currentMahjong2 != null)
+                        {
+                            Mahjong to = currentMahjong2.GetComponent<Mahjong>() as Mahjong;
+                            if(to.GetStatus()!=Status.Gone){
+                                myMahjongs.updateMahjong(this, to.GetMahjongValue());
+                                to.SetStatus(Status.Gone);
+                            }
+                        } else {
+                            // (未知错误的时候，通常不会发生)如果是手里的牌，但又没有摸牌，则恢复。
+                            SetStatus(Status.Holding);
+                        }
                     }
                     break;
                 case Status.HoldingToGang:
-                    gameObject.SendMessage("OnMahjongSelectedToGang", mahjongValue);
+                    myMahjongs.OnMahjongSelectedToGang(mahjongValue);
                     break;
 
             }

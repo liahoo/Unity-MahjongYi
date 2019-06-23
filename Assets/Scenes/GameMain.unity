@@ -405,6 +405,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mahjongPrefab: {fileID: 8693366055521354069, guid: e53290fb0552146a38051e050ddca1f4,
     type: 3}
+  gangArea: {fileID: 1761924180}
+  gangButton: {fileID: 1261096949}
+  huButton: {fileID: 830491905}
+  mahjongCurrent: {fileID: 714690412}
 --- !u!1001 &244829036
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -872,6 +876,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 32017a6e841574d98bfee7e29f069dce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentMahjong: {fileID: 714690412}
 --- !u!1 &714690412 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 8693366055521354069, guid: e53290fb0552146a38051e050ddca1f4,
@@ -1495,6 +1500,7 @@ RectTransform:
   - {fileID: 1149021895}
   - {fileID: 212621232}
   - {fileID: 560933075}
+  - {fileID: 1761924180}
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1512,7 +1518,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 947166413}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 214c363cc1fc64ce2832bfea545825a6, type: 3}
+  m_Script: {fileID: 11500000, guid: 8297ddde943c146e7b5b008ebf3fde83, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &1135512573
@@ -1684,7 +1690,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -260}
+  m_AnchoredPosition: {x: 0, y: -200}
   m_SizeDelta: {x: -40, y: 360}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1149021896
@@ -2579,6 +2585,66 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 1652503170}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1761924179
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1761924180}
+  - component: {fileID: 1761924181}
+  m_Layer: 5
+  m_Name: GangOpened
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &1761924180
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761924179}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.75, y: 0.75, z: 1}
+  m_Children: []
+  m_Father: {fileID: 947166418}
+  m_RootOrder: 4
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 360, y: 240}
+  m_SizeDelta: {x: 800, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1761924181
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761924179}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -2095666955, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 0
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 6
+  m_StartCorner: 0
+  m_StartAxis: 0
+  m_CellSize: {x: 60, y: 90}
+  m_Spacing: {x: 20, y: 0}
+  m_Constraint: 2
+  m_ConstraintCount: 1
 --- !u!1001 &1784457728
 PrefabInstance:
   m_ObjectHideFlags: 0

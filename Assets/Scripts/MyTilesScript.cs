@@ -11,9 +11,14 @@ namespace MahjongGame.Controllers
     public class MyTilesScript : MonoBehaviour
     {
         public GameObject mahjongPrefab;
+        public Transform gangArea;
+        public GameObject gangButton;
+        public GameObject huButton;
+        public GameObject mahjongCurrent;
         // public Transform throwTo;
         private bool isInited = false;
         private List<int> valueList = new List<int>();
+        private List<int> gangList = new List<int>();
         private int MaxCount = 13;
         // Start is called before the first frame update
         void Start()
@@ -103,27 +108,43 @@ namespace MahjongGame.Controllers
                     i+=currentCount;
                 }
             }
+            
             if(foundGangIndexStart >= 0) {
-                GameObject.Find("Gang").SendMessage("OnGangEnabled");
-                // gameObject.SendMessage("OnGangEnabled");
+                gangButton.GetComponent<GangScript>().OnGangEnabled(true);
                 return true;
             } else {
+                gangButton.GetComponent<GangScript>().OnGangEnabled(false);
                 return false;
             }
         }
 
         public void handleGang(int startIndex){
             Debug.Log("[handleGang] startIndex:" + startIndex);
-            MaxCount++;
-            Mahjong mj = null;
-            for (int i = startIndex; i < startIndex + 4; i++)
+            Mahjong[] mj = new Mahjong[4];
+            for (int i = 0; i < 4; i++)
             {
-                mj = transform.GetChild(i).gameObject.GetComponent<Mahjong>();
-                Debug.Log("[handleGang] mj:" + mj);
-                mj.SetStatus(Mahjong.Status.Closed);
+                gangList.Add(valueList[startIndex+i]);
+                mj[i] = transform.GetChild(i+startIndex).gameObject.GetComponent<Mahjong>();
             }
-            mj.SetStatus(Mahjong.Status.Opened);
+            Array.ForEach(mj, (m) => { 
+                m.SetStatus(Mahjong.Status.IsForGang);
+                m.transform.localScale = new Vector3(0.75f, 0.75f, 1f);
+                m.transform.SetParent(gangArea);
+            });
+            MaxCount-=3;
+            valueList.RemoveRange(startIndex, 4);
+            AddCurrentMahjongToMine();
+            ResetStatus();
         }
+
+        private void AddCurrentMahjongToMine()
+        {
+            if(!mahjongCurrent) mahjongCurrent=GameObject.Find("CurrentMahjong");
+            Mahjong currentMahjong = mahjongCurrent.GetComponent<Mahjong>();
+            CreateMahjongByValue((currentMahjong.GetMahjongValue()));
+            currentMahjong.SetStatus(Mahjong.Status.Gone);
+        }
+
         public void ResetStatus()
         {
             Debug.Log("[ResetStatus]");
@@ -193,26 +214,6 @@ namespace MahjongGame.Controllers
             mjToAdd.transform.SetSiblingIndex(valueList.IndexOf(mjToAdd.GetMahjongValue()));
         }
 
-        public void ReplaceMahjong(Mahjong mjToAdd) {
-            mjToAdd.SetStatus(Mahjong.Status.Holding);
-            mjToAdd.isMine = true;
-            mjToAdd.transform.SetParent(this.gameObject.transform, false);
-            valueList.Add(mjToAdd.GetMahjongValue());
-            valueList.Sort();
-            mjToAdd.transform.SetSiblingIndex(valueList.IndexOf(mjToAdd.GetMahjongValue()));
-        }
-        public void DeleteMahjong(Mahjong from)
-        {
-            valueList.Remove(from.GetMahjongValue());
-            // from.transform.SetParent(throwTo, false);
-            from.SetStatus(Mahjong.Status.Opened);
-
-        }
-        public void ReplaceMahjong(Mahjong from, Mahjong to){
-            DeleteMahjong(from);
-            AddMahjong(to);
-        }
-
         public void updateMahjong(Mahjong from, int toValue){
             ResetStatus();
             int fromValue = from.GetMahjongValue();
@@ -235,17 +236,6 @@ namespace MahjongGame.Controllers
             } else if( checkHupai()) {
                 handleHupai();
             }
-
-        }
-        public bool ReceiveMahjong(Mahjong mj)
-        {
-            if (transform.childCount < MaxCount)
-            {
-                AddMahjong(mj);
-                return true;
-            }
-            Debug.LogWarning("[ReceiveMahjong] Failed: Already has childCount = " + transform.childCount);
-            return false;
         }
     }
 }

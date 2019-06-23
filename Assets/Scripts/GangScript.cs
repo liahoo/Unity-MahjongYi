@@ -18,9 +18,9 @@ namespace MahjongGame.Controllers
 
         }
 
-        public void OnGangEnabled()
+        public void OnGangEnabled(bool to_enabled)
         {
-            gangEnabled = true;
+            gangEnabled = to_enabled;
         }
         public void onPointUp()
         {
